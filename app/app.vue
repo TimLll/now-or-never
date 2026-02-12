@@ -25,8 +25,10 @@ useSeoMeta({
 })
 </script>
 
+
 <template>
   <UApp>
+    <!--
     <UHeader>
       <template #left>
         <NuxtLink to="/">
@@ -48,12 +50,13 @@ useSeoMeta({
           variant="ghost"
         />
       </template>
-    </UHeader>
+    </UHeader> -->
 
     <UMain>
       <NuxtPage />
     </UMain>
 
+    <!--
     <USeparator icon="i-simple-icons-nuxtdotjs" />
 
     <UFooter>
@@ -73,6 +76,7 @@ useSeoMeta({
           variant="ghost"
         />
       </template>
-    </UFooter>
+    </UFooter> 
+    -->
   </UApp>
 </template>

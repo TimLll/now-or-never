@@ -2,7 +2,8 @@
 @import "@nuxt/ui";
 
 @theme static {
-  --font-sans: 'Public Sans', sans-serif;
+  --font-sans: 'Anonymous Pro', sans-serif;
+  /* --font-sans: 'Michroma', sans-serif; */
 
   --color-green-50: #EFFDF5;
   --color-green-100: #D9FBE8;
