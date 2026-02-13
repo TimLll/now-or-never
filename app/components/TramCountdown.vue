@@ -104,8 +104,8 @@ function countdownClass(iso: string) {
 .tram-countdown {
   max-width: 650px;
   margin: 0;
-  /* background: linear-gradient(90deg,rgba(160, 111, 191, 1) 0%, rgba(255, 125, 125, 1) 50%, rgba(255, 209, 145, 1) 100%);*/
-  background: black;
+  background: linear-gradient(90deg,rgb(7, 0, 33) 0%, rgb(6, 0, 59) 100%);
+  /* background: rgb(4, 0, 32);*/
   border-radius: 1rem;
   box-shadow: 0 2px 8px #0001;
   padding: 3rem;
