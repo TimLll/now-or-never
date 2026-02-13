@@ -51,6 +51,22 @@ Build the application for production:
 pnpm build
 ```
 
+## Testing
+
+Run the test suite:
+
+```bash
+pnpm test
+```
+
+## Linting
+
+Check for linting issues:
+
+```bash
+pnpm lint
+```
+
 Locally preview production build:
 
 ```bash
