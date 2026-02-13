@@ -16,8 +16,10 @@
     "@iconify-json/simple-icons": "^1.2.68",
     "@nuxt/ui": "^4.4.0",
     "@nuxtjs/google-fonts": "^3.2.0",
+    "@types/xml2js": "^0.4.14",
     "nuxt": "^4.3.0",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.13.0",

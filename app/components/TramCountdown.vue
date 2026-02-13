@@ -1,73 +1,106 @@
 <template>
   <div class="tram-countdown">
-    <h1 class="text-black text-6xl font-semi-bold mb-8 pb-1 text-center border-dotted border-b-2 font-bangers bg-linear-to-r from-pink-600 to-fuchsia-900 bg-clip-text text-transparent ...">Now or Never!</h1>
-    <div class="text-black grid grid-cols-2 gap-20 tram-countdown-grid w-full justify-center bg-white rounded-xl p-10">
-      <div class="flex flex-col items-center">
-        <h3 class="text-black text-2xl font-semibold pb-1 opacity-65 decoration-dotted underline">Linie {{ north[0]?.line }} {{ north[0]?.destination }}</h3>
-          <div v-if="north[0]">
-            <div class="flex items-center gap-2 justify-end">
-              <span class="font-mono text-3xl pr-2">{{ formatTime(north[0].plannedDeparture) }}</span>
-              <span :class="['text-3xl', countdownClass(north[0].plannedDeparture)]">{{ countdownDisplay(north[0].plannedDeparture) }}</span>
-            </div>
-          </div>
+    <h1 class="text-black text-5xl font-semibold mb-2 pb-1 text-center border-dotted border-b-2 font-bangers bg-linear-to-r from-pink-600 to-fuchsia-900 bg-clip-text text-transparent">
+      Now or Never!
+    </h1>
+    <p class="text-center text-white/80 text-3xl font-bold mb-8">{{ stationName }}</p>
+    <div class="board">
+      <p v-if="errorMessage" class="text-center text-red-400 font-medium mb-4">{{ errorMessage }}</p>
+        <div v-if="visibleDepartures.length" class="departure-list">
+          <div
+            v-for="dep in visibleDepartures"
+          :key="dep.plannedDeparture + dep.line + dep.destination"
+          class="departure-row"
+        >
+          <span class="line-chip">{{ dep.line ?? '?' }}</span>
+          <span class="destination">{{ dep.destination ?? 'Unbekannt' }}</span>
+          <span class="time">{{ formatTime(dep.plannedDeparture) }}</span>
+          <span class="countdown" :class="countdownClass(dep.plannedDeparture)">
+            {{ countdownDisplay(dep.plannedDeparture) }}
+          </span>
+        </div>
       </div>
-      <div class="flex flex-col items-center">
-        <h3 class="text-2xl font-semibold pb-1 opacity-65 decoration-dotted underline">Linie {{ south[0]?.line }} {{ south[0]?.destination }}</h3>
-          <div v-if="south[0]">
-            <div class="flex items-center gap-2 justify-start">
-              <span class="font-mono text-3xl pr-2">{{ formatTime(south[0].plannedDeparture) }}</span>
-              <span :class="['text-3xl', countdownClass(south[0].plannedDeparture)]">{{ countdownDisplay(south[0].plannedDeparture) }}</span>
-            </div>
-          </div>
-      </div>
+        <p v-else class="text-center text-white/70">Keine Abfahrten in den nächsten Minuten.</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 
 interface Departure {
-  line: string
-  destination: string
+  line?: string
+  destination?: string
   plannedDeparture: string // ISO
 }
 
-const north = ref<Departure[]>([])
-const south = ref<Departure[]>([])
+interface DeparturesResponse {
+  station: { id: string; name: string }
+  departures: Departure[]
+  error?: string
+}
+
+const departures = ref<Departure[]>([])
+const stationName = ref('Darmstadt Lincoln-Siedlung')
+const errorMessage = ref<string | null>(null)
 
 const fetchDepartures = async () => {
-  const data = await $fetch('/api/departures')
-  north.value = data.northbound
-  south.value = data.southbound
+  try {
+    const apiKey = import.meta.env.VITE_API_KEY
+    const endpoint = apiKey ? `/api/departures?key=${apiKey}` : '/api/departures'
+    const data = await $fetch<DeparturesResponse>(endpoint)
+    departures.value = data.departures ?? []
+    stationName.value = data.station?.name ?? stationName.value
+    errorMessage.value = data.error ?? null
+    updateCountdowns()
+  } catch (error) {
+    console.error('Failed to fetch departures', error)
+    departures.value = []
+    errorMessage.value = 'Abfahrten konnten nicht geladen werden.'
+  }
 }
 
 // Reaktive Map für Countdowns
 const countdowns = ref<Record<string, number>>({})
+const visibleDepartures = computed(() =>
+  departures.value.filter((dep) => (countdowns.value[dep.plannedDeparture] ?? Number.POSITIVE_INFINITY) > 0)
+)
 
 function updateCountdowns() {
-  const update = (depList: Departure[]) => {
-    depList.forEach(dep => {
-      const depTime = new Date(dep.plannedDeparture).getTime()
-      const now = Date.now()
-      countdowns.value[dep.plannedDeparture] = Math.max(depTime - now, 0)
-    })
-  }
-  update(north.value)
-  update(south.value)
+  const activeKeys = new Set<string>()
+  departures.value.forEach(dep => {
+    if (!dep.plannedDeparture) return
+    const depTime = new Date(dep.plannedDeparture).getTime()
+    const now = Date.now()
+    const remaining = Math.max(depTime - now, 0)
+    countdowns.value[dep.plannedDeparture] = remaining
+    activeKeys.add(dep.plannedDeparture)
+  })
+  Object.keys(countdowns.value).forEach((key) => {
+    if (!activeKeys.has(key)) {
+      delete countdowns.value[key]
+    }
+  })
 }
 
-let timer: number | undefined
+let countdownTimer: ReturnType<typeof setInterval> | null = null
+let refreshTimer: ReturnType<typeof setInterval> | null = null
+
 onMounted(() => {
   fetchDepartures()
-  timer = setInterval(() => {
-    updateCountdowns()
-  }, 10) // 10ms für Hundertstel
-  const depInterval = setInterval(fetchDepartures, 20000)
-  onUnmounted(() => {
-    clearInterval(timer)
-    clearInterval(depInterval)
-  })
+  countdownTimer = setInterval(updateCountdowns, 50)
+  refreshTimer = setInterval(fetchDepartures, 20000)
+})
+
+onUnmounted(() => {
+  if (countdownTimer) {
+    clearInterval(countdownTimer)
+    countdownTimer = null
+  }
+  if (refreshTimer) {
+    clearInterval(refreshTimer)
+    refreshTimer = null
+  }
 })
 
 function formatTime(iso: string) {
@@ -102,37 +135,76 @@ function countdownClass(iso: string) {
 
 <style scoped>
 .tram-countdown {
-  max-width: 650px;
-  margin: 0;
+  max-width: 900px;
+  height: 900px;
+  min-width: 450px;
+  margin: 0 auto;
   background: linear-gradient(90deg,rgb(7, 0, 33) 0%, rgb(6, 0, 59) 100%);
   /* background: rgb(4, 0, 32);*/
   border-radius: 1rem;
   box-shadow: 0 2px 8px #0001;
-  padding: 3rem;
+  padding: 3.5rem;
 }
- .tram-countdown-grid {
-   display: grid;
-   grid-template-columns: 1fr 1fr;
-   gap: 2.5rem;
-   align-items: start;
-   width: 100%;
-   min-width: 300px;
- }
- .tram-countdown-grid > div {
-   width: 100%;
- }
  .tram-countdown {
    display: flex;
    flex-direction: column;
    align-items: center;
  }
-@media (max-width: 600px) {
-  .tram-countdown-grid {
-    grid-template-columns: 1fr !important;
-    gap: 2rem;
+ .board {
+   width: 100%;
+   background: #fff;
+   border-radius: 1rem;
+   padding: 2rem;
+   box-shadow: inset 0 0 0 1px #0000000d;
+ }
+ .departure-list {
+   display: flex;
+   flex-direction: column;
+   gap: 1rem;
+ }
+ .departure-row {
+   display: grid;
+   grid-template-columns: 90px 1fr 100px 160px;
+   gap: 1rem;
+   align-items: center;
+   padding-bottom: 0.75rem;
+   border-bottom: 1px dashed #1f1f1f21;
+ }
+ .departure-row:last-child {
+   border-bottom: none;
+ }
+ .line-chip {
+   font-weight: 700;
+   padding: 0.35rem 0.65rem;
+   border-radius: 999px;
+   background: linear-gradient(120deg, #f97316, #db2777);
+   color: #fff;
+   text-align: center;
+   width: 3.5rem;
+ }
+ .destination {
+   font-size: 1.1rem;
+   font-weight: 500;
+ }
+ .time {
+   font-family: 'Space Mono', 'Fira Code', monospace;
+   font-size: 1.4rem;
+   text-align: right;
+ }
+ .countdown {
+   font-size: 1.4rem;
+   font-family: 'Space Mono', 'Fira Code', monospace;
+   justify-self: end;
+ }
+@media (max-width: 800px) {
+  .departure-row {
+    grid-template-columns: 70px 1fr;
+    gap: 0.75rem;
   }
-  .tram-countdown-grid > div {
-    width: 100%;
+  .time,
+  .countdown {
+    text-align: left;
+    justify-self: flex-start;
   }
 }
  .font-bangers {

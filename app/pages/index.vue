@@ -75,5 +75,3 @@
     </UPageSection> -->
   </div>
 </template>
-
-import TramCountdown from '~/components/TramCountdown.vue'

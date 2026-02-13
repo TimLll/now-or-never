@@ -17,3 +17,15 @@
   --color-green-900: #0A5331;
   --color-green-950: #052E16;
 }
+
+html,
+body {
+  min-width: 450px;
+}
+
+body {
+  width: 100%;
+  margin: 0;
+  background-color: black;
+  overflow-x: auto;
+}
