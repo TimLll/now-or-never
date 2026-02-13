@@ -1,9 +1,9 @@
 <template>
   <div class="tram-countdown">
-    <h1 class="text-black text-2xl font-semi-bold mb-8 pb-1 text-center border-dotted border-b-1 font-bangers">Now or Never!</h1>
-    <div class="text-black grid grid-cols-2 gap-20 tram-countdown-grid w-full">
+    <h1 class="text-black text-6xl font-semi-bold mb-8 pb-1 text-center border-dotted border-b-2 font-bangers bg-linear-to-r from-pink-600 to-fuchsia-900 bg-clip-text text-transparent ...">Now or Never!</h1>
+    <div class="text-black grid grid-cols-2 gap-20 tram-countdown-grid w-full justify-center bg-white rounded-xl p-10">
       <div class="flex flex-col items-center">
-        <h3 class="text-black text-2xl font-semibold pb-3 opacity-65">← Arheilgen</h3>
+        <h3 class="text-black text-2xl font-semibold pb-1 opacity-65 decoration-dotted underline">Linie {{ north[0]?.line }} {{ north[0]?.destination }}</h3>
           <div v-if="north[0]">
             <div class="flex items-center gap-2 justify-end">
               <span class="font-mono text-3xl pr-2">{{ formatTime(north[0].plannedDeparture) }}</span>
@@ -12,7 +12,7 @@
           </div>
       </div>
       <div class="flex flex-col items-center">
-        <h3 class="text-2xl font-semibold pb-3 opacity-65">Bergstraße →</h3>
+        <h3 class="text-2xl font-semibold pb-1 opacity-65 decoration-dotted underline">Linie {{ south[0]?.line }} {{ south[0]?.destination }}</h3>
           <div v-if="south[0]">
             <div class="flex items-center gap-2 justify-start">
               <span class="font-mono text-3xl pr-2">{{ formatTime(south[0].plannedDeparture) }}</span>
@@ -102,12 +102,13 @@ function countdownClass(iso: string) {
 
 <style scoped>
 .tram-countdown {
-  max-width: 600px;
-  margin: 2rem auto;
-  background: linear-gradient(90deg,rgba(160, 111, 191, 1) 0%, rgba(255, 125, 125, 1) 50%, rgba(255, 209, 145, 1) 100%);
+  max-width: 650px;
+  margin: 0;
+  /* background: linear-gradient(90deg,rgba(160, 111, 191, 1) 0%, rgba(255, 125, 125, 1) 50%, rgba(255, 209, 145, 1) 100%);*/
+  background: black;
   border-radius: 1rem;
   box-shadow: 0 2px 8px #0001;
-  padding: 5rem;
+  padding: 3rem;
 }
  .tram-countdown-grid {
    display: grid;
@@ -115,6 +116,7 @@ function countdownClass(iso: string) {
    gap: 2.5rem;
    align-items: start;
    width: 100%;
+   min-width: 300px;
  }
  .tram-countdown-grid > div {
    width: 100%;
@@ -134,13 +136,14 @@ function countdownClass(iso: string) {
   }
 }
  .font-bangers {
-   font-family: 'Bangers', cursive;
+   font-family: 'Monoton';
+   min-width: 300px;
  }
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
 .animate-blink {
-  animation: blink 1s steps(2, start) infinite;
+  animation: blink 0.5s steps(3, start) infinite;
 }
 </style>

@@ -5,12 +5,12 @@ export default defineEventHandler(() => {
   // Beispiel: Zwei Richtungen, je 2 Abfahrten
   return {
     northbound: [
-      { line: '3', destination: 'Lichtenbergschule', plannedDeparture: '2026-02-13T10:40:00+01:00' },
-      { line: '3', destination: 'Lichtenbergschule', plannedDeparture: '2026-02-13T10:30:00+01:00' }
+      { line: '8', destination: 'Arheilgen', plannedDeparture: '2026-02-13T11:00:00+01:00' },
+      { line: '8', destination: 'Arheilgen', plannedDeparture: '2026-02-13T11:00:00+01:00' }
     ],
     southbound: [
-      { line: '3', destination: 'Lichtenbergschule', plannedDeparture: '2026-02-13T10:50:00+01:00' },
-      { line: '3', destination: 'Lichtenbergschule', plannedDeparture: '2026-02-13T10:40:00+01:00' }
+      { line: '8', destination: 'Alsbach', plannedDeparture: '2026-02-13T11:10:00+01:00' },
+      { line: '8', destination: 'Alsbach', plannedDeparture: '2026-02-13T11:10:00+01:00' }
     ]
   }
 })
