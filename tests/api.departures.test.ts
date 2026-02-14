@@ -16,9 +16,9 @@ describe('GET /api/stops/:stopId/departures', () => {
     expect(data.departures.length).toBe(2)
   })
 
-  it('clamps limit to max = 5', async () => {
+  it('clamps limit to max = 4', async () => {
     const data = await getJson('/api/stops/lincoln/departures?limit=99')
-    expect(data.departures.length).toBe(5)
+    expect(data.departures.length).toBe(4)
   })
 
   it('falls back to default when limit is invalid', async () => {

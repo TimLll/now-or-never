@@ -1,50 +1,76 @@
-# Live Data Integration
+# Project Documentation
 
-## Overview
-The application has been updated to fetch live tram departure data from an external API. This document outlines the changes made and how to configure the application for live data.
+## 1. Architecture Overview
 
----
+- **Frontend**: Nuxt 4 + Nuxt UI renders the TramCountdown component. All data
+  is fetched through the `/api/departures` endpoint so the browser never sees
+  the RMV API key.
+- **Backend**: Nitro serverless route `server/api/departures.ts` wraps the RMV
+  HAFAS API using Axios + xml2js, caches station ids, and normalises departures
+  to a compact schema consumed by the UI.
+- **Styling**: Tailwind CSS via `@tailwindcss/vite` plugin.
+- **Testing**: Vitest checks API contract expectations in `tests/`.
 
-## Changes Made
+## 2. Environment & Secrets
 
-### 1. `TramCountdown.vue`
-- Updated the `fetchDepartures` function to use the API key from the `.env` file.
-- The API key is accessed via `import.meta.env.VITE_API_KEY`.
+| Variable      | Scope   | Description                                             |
+|---------------|---------|---------------------------------------------------------|
+| `RMV_API_KEY` | Server  | Required. Used by Nitro runtime via `runtimeConfig`.     |
+| `VITE_API_KEY`| Server  | Legacy fallback; avoid using unless necessary.          |
 
-### 2. `.env`
-- A new `.env` file has been created to store the API key securely.
-- Add your API key to the `.env` file:
-  ```env
-  VITE_API_KEY=your_api_key_here
-  ```
+Usage rules:
 
-### 3. `departures.ts`
-- Updated the mock API to fetch real data from an external source.
-- The API key is retrieved from `process.env.VITE_API_KEY`.
-- Axios is used to make the HTTP request to the external API.
-- Error handling is added to ensure the application remains functional if the API call fails.
+1. Define `RMV_API_KEY` in local `.env` (ignored by git) and in Vercel →
+   Project Settings → Environment Variables (Production + Preview + Dev).
+2. The server handler reads `useRuntimeConfig().rmvApiKey`. If missing it returns
+   a friendly error payload so the UI can warn the user.
+3. The frontend never appends the key to the request (see
+   `app/components/TramCountdown.vue`).
 
----
+## 3. CI/CD Concept
 
-## Configuration
+### Continuous Integration
 
-1. Obtain an API key from the data provider.
-2. Add the API key to the `.env` file:
-   ```env
-   VITE_API_KEY=your_api_key_here
-   ```
-3. Restart the development server to apply the changes.
+Workflow: `.github/workflows/ci.yml`
 
----
+- Trigger: every push/pull_request
+- Runs on `ubuntu-latest` with Node 22 and pnpm
+- Steps: install deps → `pnpm lint` → `pnpm typecheck` → `pnpm test:run`
+- Purpose: keep the Nuxt/Vite pipeline healthy before deploying to Vercel
 
-## Notes
-- Ensure the `.env` file is included in `.gitignore` to prevent exposing sensitive information.
-- The application will display empty data if the API call fails.
+### Continuous Deployment
 
----
+- Provider: Vercel (`now-or-never-two` project)
+- Source: GitHub `main` branch
+- Build command: `pnpm install && pnpm build`
+- Output: `.output` consumed by Vercel’s Nitro adapter
+- Env vars: `RMV_API_KEY` set per environment scope in the Vercel UI
+- Promotion: every push gets a Preview URL; merges to `main` become Production
 
-## Dependencies
-- **Axios**: Ensure Axios is installed in the project. If not, install it using:
-  ```bash
-  npm install axios
-  ```
+## 4. Developer Workflow
+
+| Action                   | Command                     | Notes                                      |
+|--------------------------|-----------------------------|--------------------------------------------|
+| Install deps             | `pnpm install`              | Requires Node 22+                          |
+| Start dev server         | `pnpm dev`                  | Auto reload, uses `.env` secrets           |
+| Lint                     | `pnpm lint`                 | ESLint config via `@nuxt/eslint`           |
+| Typecheck                | `pnpm typecheck`            | Nuxt’s type analyzer                       |
+| Unit/API tests           | `pnpm test` or `pnpm vitest`| Uses Vitest + fetch against dev server     |
+| Production build         | `pnpm build`                | Generates `.output` for Nitro/Vercel       |
+| Preview prod bundle      | `pnpm preview`              | Runs `.output/server/index.mjs` locally    |
+
+## 5. Troubleshooting
+
+| Symptom                                           | Resolution                                                                 |
+|---------------------------------------------------|----------------------------------------------------------------------------|
+| `/api/departures` returns 500 on Vercel           | Ensure latest commit (with Axios in dependencies) is deployed; redeploy.   |
+| UI shows “Abfahrten konnten nicht geladen werden” | Inspect `/api/departures` JSON for `error`; most cases are missing API key |
+| Local dev cannot authenticate                     | Verify `.env` contains `RMV_API_KEY` and restart `pnpm dev`.               |
+| CI fails fetching RMV data                        | Mock responses or temporarily skip live tests when API is unavailable.     |
+
+## 6. Operational Checklist
+
+1. Secret rotation: update `RMV_API_KEY` in Vercel + `.env` simultaneously
+2. Dependency updates via Renovate/`pnpm up` should be followed by `pnpm test`
+3. Observe Vercel function logs for RMV rate limit errors
+4. Keep `.output/` and `.nuxt/` out of git (already ignored)

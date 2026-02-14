@@ -134,7 +134,7 @@ function countdownClass(iso: string) {
 <style scoped>
 .tram-countdown {
   max-width: 900px;
-  height: 900px;
+  height: 100%;
   min-width: 450px;
   margin: 0 auto;
   background: linear-gradient(90deg,rgb(7, 0, 33) 0%, rgb(6, 0, 59) 100%);
