@@ -36,6 +36,9 @@ export default defineNuxtConfig({
 
   nitro: {
     minify: false,
+    externals: {
+      inline: ['axios']
+    },
     prerender: {
       crawlLinks: false,
       routes: ['/']
