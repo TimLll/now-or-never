@@ -46,9 +46,7 @@ const errorMessage = ref<string | null>(null)
 
 const fetchDepartures = async () => {
   try {
-    const apiKey = import.meta.env.VITE_API_KEY
-    const endpoint = apiKey ? `/api/departures?key=${apiKey}` : '/api/departures'
-    const data = await $fetch<DeparturesResponse>(endpoint)
+    const data = await $fetch<DeparturesResponse>('/api/departures')
     departures.value = data.departures ?? []
     stationName.value = data.station?.name ?? stationName.value
     errorMessage.value = data.error ?? null

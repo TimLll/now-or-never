@@ -123,15 +123,23 @@ const resolveRmvStationId = async (station: StationMeta, apiKey: string): Promis
 };
 
 export default defineEventHandler(async (event) => {
-  const query = (event.context?.query ?? {}) as Record<string, unknown>;
-  const queryKey = sanitizeKey(toStringParam(query.key));
-  const apiKey = process.env.VITE_API_KEY ?? queryKey;
-  if (!apiKey) {
-    throw new Error('Missing RMV API key. Set VITE_API_KEY or provide ?key= in the request.');
-  }
+  const runtimeConfig = useRuntimeConfig() as { rmvApiKey?: string }
+  const query = (event.context?.query ?? {}) as Record<string, unknown>
+  const queryKey = sanitizeKey(toStringParam(query.key))
+  const configKey = sanitizeKey(runtimeConfig?.rmvApiKey)
+  const fallbackKey = sanitizeKey(process.env.RMV_API_KEY ?? process.env.VITE_API_KEY)
+  const apiKey = configKey ?? fallbackKey ?? queryKey
 
-  const stationParam = toStringParam(query.station ?? query.stationId ?? query.stop);
-  const station = resolveStation(stationParam);
+  const stationParam = toStringParam(query.station ?? query.stationId ?? query.stop)
+  const station = resolveStation(stationParam)
+
+  if (!apiKey) {
+    return {
+      station,
+      error: 'Missing RMV API key. Set RMV_API_KEY (preferred) or VITE_API_KEY in the server environment.',
+      departures: []
+    }
+  }
 
   try {
     const rmvStationId = await resolveRmvStationId(station, apiKey);

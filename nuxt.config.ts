@@ -34,6 +34,11 @@ export default defineNuxtConfig({
     }
   },
 
+  runtimeConfig: {
+    rmvApiKey: process.env.RMV_API_KEY ?? process.env.VITE_API_KEY,
+    public: {}
+  },
+
   nitro: {
     minify: false,
     externals: {
