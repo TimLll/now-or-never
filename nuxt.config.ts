@@ -1,5 +1,14 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  app: {
+    head: {
+      title: 'Now or Never!',
+      meta: [
+        { name: 'description', content: 'Run or Regret.' }
+      ]
+    }
+  },
+
   modules: [
     '@nuxt/eslint',
     '@nuxt/ui',
@@ -20,7 +29,12 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   routeRules: {
-    '/': { prerender: true }
+    '/': {
+      prerender: true,
+      headers: {
+        'cache-control': 'public, max-age=0, must-revalidate'
+      }
+    }
   },
 
   compatibilityDate: '2025-01-15',
