@@ -20,12 +20,12 @@
 
 html,
 body {
-  min-width: 450px;
+  width: 100%;
+  min-width: 100%;
 }
 
 body {
-  width: 100%;
   margin: 0;
   background-color: black;
-  overflow-x: auto;
+  overflow-x: hidden;
 }

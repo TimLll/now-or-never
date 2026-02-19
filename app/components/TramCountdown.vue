@@ -3,7 +3,7 @@
     <h1 class="text-black text-5xl font-semibold mb-2 pb-1 text-center border-dotted border-b-2 font-bangers bg-linear-to-r from-pink-600 to-fuchsia-900 bg-clip-text text-transparent">
       Now or Never!
     </h1>
-    <p class="text-center text-white/80 text-3xl font-bold mb-8">{{ stationName }}</p>
+    <p class="station-name text-center text-white/80 text-3xl font-bold mb-8">{{ stationName }}</p>
     <div class="board">
       <p v-if="errorMessage" class="text-center text-red-400 font-medium mb-4">{{ errorMessage }}</p>
         <div v-if="visibleDepartures.length" class="departure-list">
@@ -133,15 +133,16 @@ function countdownClass(iso: string) {
 
 <style scoped>
 .tram-countdown {
+  width: 100%;
   max-width: 900px;
   height: 100%;
-  min-width: 450px;
   margin: 0 auto;
+  box-sizing: border-box;
   background: linear-gradient(90deg,rgb(7, 0, 33) 0%, rgb(6, 0, 59) 100%);
   /* background: rgb(4, 0, 32);*/
   border-radius: 1rem;
   box-shadow: 0 2px 8px #0001;
-  padding: 3.5rem;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
 }
  .tram-countdown {
    display: flex;
@@ -205,10 +206,26 @@ function countdownClass(iso: string) {
     justify-self: flex-start;
   }
 }
+@media (max-width: 600px) {
+  .board {
+    padding: 1.25rem;
+  }
+}
  .font-bangers {
    font-family: 'Monoton';
    min-width: 300px;
  }
+@media (max-width: 480px) {
+  .font-bangers {
+    min-width: 0;
+    font-size: 2.1rem;
+    line-height: 1.1;
+  }
+  .station-name {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+}
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
