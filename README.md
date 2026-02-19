@@ -1,97 +1,89 @@
-# Now or Never – Live RMV Departures
+# Now or Never
 
-Now or Never is a Nuxt 4 app that renders a real-time departure board for the
-RMV network around Darmstadt Lincoln-Siedlung. The frontend is built with Nuxt
-UI, Tailwind, and a custom TramCountdown component, while the backend logic runs
-as a Nitro serverless function that proxies the RMV HAFAS API.
+Live-Abfahrtsanzeige für die Lincoln-Siedlung (RMV) auf Basis von Nuxt 4.
 
-## Tech Stack
+## Überblick
 
-- Nuxt 4 + Nitro for SSR/serverless routes
-- Nuxt UI + Tailwind CSS for the interface
-- Axios + xml2js for RMV API parsing
-- pnpm for dependency management
-- Vitest for API contract tests
-- GitHub Actions CI + Vercel hosting (Production/Preview)
+- Frontend: Nuxt UI + Tailwind + `TramCountdown`
+- Backend: Nitro API Route für RMV HAFAS (`server/api/departures.ts`)
+- Tests: Vitest API-Tests in `tests/`
+- Hosting: Vercel
 
-## Local Development
+## Voraussetzungen
 
-1. Install dependencies (Node 22+):
+- Node.js 22+
+- pnpm 10+
+- RMV API Key
+
+## Setup
+
+1. Dependencies installieren:
 
    ```bash
    pnpm install
    ```
 
-2. Configure your RMV HAFAS API key:
+2. Environment Variable setzen (`.env` oder `.env.local`):
 
    ```bash
-   cp .env .env.local   # or create manually
-   # In .env.local
    RMV_API_KEY=your_api_key
    ```
 
-   `RMV_API_KEY` is read on the server via Nuxt runtime config. The legacy
-   `VITE_API_KEY` is only used as a fallback for backwards compatibility.
-
-3. Start the dev server:
+3. Dev-Server starten:
 
    ```bash
    pnpm dev
    ```
 
-4. Run tests/linting as needed:
+## Wichtige Scripts
 
-   ```bash
-   pnpm test        # Vitest API checks
-   pnpm lint        # ESLint
-   pnpm typecheck   # Nuxt type analyzer
-   ```
+- `pnpm dev` – lokale Entwicklung
+- `pnpm build` – Production Build
+- `pnpm preview` – Production Build lokal starten
+- `pnpm lint` – ESLint
+- `pnpm typecheck` – Nuxt Typecheck
+- `pnpm test` / `pnpm test:run` – Vitest
 
-## Production Build
+## API-Endpunkte
 
-```bash
-pnpm run build      # creates .output for Nitro/Vercel
-pnpm run preview    # serve the production bundle locally
-```
+- `GET /api/departures`
+  - Live-Abfahrten für die konfigurierte Station
+  - nutzt `RMV_API_KEY` serverseitig
 
-## CI/CD Concept
+- `GET /api/stops/:stopId/departures?limit=...`
+  - Mock-Endpunkt (z. B. für Tests/Entwicklung)
+  - `limit` Default: 2, Min: 1, Max: 5
 
-### Continuous Integration (GitHub Actions)
+## Deploy (Vercel)
 
-`.github/workflows/ci.yml` runs on every push/pull request:
-
-1. Install pnpm dependencies
-2. Lint (`pnpm lint`)
-3. Typecheck (`pnpm typecheck`)
-4. Run tests (`pnpm test:run`)
-
-No artifacts are published; the goal is to ensure the Vite/Nuxt build stays
-healthy before Vercel receives the commit.
-
-### Continuous Deployment (Vercel)
-
-- The `main` branch is connected to the Vercel project `now-or-never-two`.
-- Environment variable `RMV_API_KEY` must be defined for Production, Preview,
-  and Development scopes in Vercel.
-- On push, Vercel builds the Nuxt project with `pnpm install && pnpm build`,
-  deploys a preview, and promotes it to production when merged to `main`.
-- Nitro inlines the Axios dependency (`nitro.externals.inline = ['axios']`) so
-  serverless functions never depend on global modules at runtime.
-
-### Deployment Checklist
-
-1. `RMV_API_KEY` set in Vercel + local `.env`
-2. Tests and lint pass locally (`pnpm test`, `pnpm lint`)
-3. CI pipeline green on GitHub
-4. Vercel preview renders live departures at `/`
+- In Vercel muss `RMV_API_KEY` für Production/Preview/Development gesetzt sein.
+- Der produktive Deploy folgt dem in Vercel eingestellten `Production Branch`:
+  - Vercel → Project → Settings → Git → Production Branch
 
 ## Troubleshooting
 
-- **Empty board / error text** – check `https://<app>/api/departures` for the
-  JSON payload; missing API key or RMV errors are echoed there.
-- **Vercel 500 “Cannot find package 'axios'”** – ensure the latest commit with
-  `axios` in `dependencies` is deployed; redeploy if necessary.
-- **Local dev 401** – confirm `RMV_API_KEY` is present and restart `pnpm dev`.
+- Leere Anzeige: `/api/departures` direkt aufrufen und `error` prüfen.
+- Alter Seitentitel sichtbar: Browser Hard-Reload (`Ctrl+F5`) und ggf. Vercel/CDN Cache revalidieren.
+- Kein automatischer Deploy: Vercel `Production Branch` und Git-Webhook prüfen.
+
+## Dokumentationsänderung
+
+### Was wurde geändert?
+
+- README neu strukturiert und auf aktuellen Projektstand gebracht.
+- Veraltete Branch-Aussagen (z. B. fester `main`-Flow) entfernt.
+- Setup, Scripts, API-Endpunkte und Deploy-Pfade konkretisiert.
+
+### Warum?
+
+- Schnellere Einarbeitung und weniger Missverständnisse beim Deploy.
+- Konsistenz mit aktuellem Code und aktuellem Vercel-Workflow.
+
+### Wie testen/prüfen?
+
+- Commands aus „Setup“ und „Wichtige Scripts“ lokal ausführen.
+- `/api/departures` und `/api/stops/lincoln/departures?limit=2` im Browser testen.
+- In Vercel prüfen, ob der richtige `Production Branch` gesetzt ist.
 
 ## License
 
