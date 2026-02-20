@@ -1,6 +1,6 @@
 # Now or Never
 
-Live-Abfahrtsanzeige für die Lincoln-Siedlung (RMV) auf Basis von Nuxt 4.
+Live-Abfahrtsanzeige für die Lincoln-Siedlung (RMV) auf Basis von Nuxt 4. Run or Regret!
 
 ## Überblick
 
@@ -14,26 +14,6 @@ Live-Abfahrtsanzeige für die Lincoln-Siedlung (RMV) auf Basis von Nuxt 4.
 - Node.js 22+
 - pnpm 10+
 - RMV API Key
-
-## Setup
-
-1. Dependencies installieren:
-
-   ```bash
-   pnpm install
-   ```
-
-2. Environment Variable setzen (`.env` oder `.env.local`):
-
-   ```bash
-   RMV_API_KEY=your_api_key
-   ```
-
-3. Dev-Server starten:
-
-   ```bash
-   pnpm dev
-   ```
 
 ## Wichtige Scripts
 
@@ -65,19 +45,6 @@ Live-Abfahrtsanzeige für die Lincoln-Siedlung (RMV) auf Basis von Nuxt 4.
 - Leere Anzeige: `/api/departures` direkt aufrufen und `error` prüfen.
 - Alter Seitentitel sichtbar: Browser Hard-Reload (`Ctrl+F5`) und ggf. Vercel/CDN Cache revalidieren.
 - Kein automatischer Deploy: Vercel `Production Branch` und Git-Webhook prüfen.
-
-## Dokumentationsänderung
-
-### Was wurde geändert?
-
-- README neu strukturiert und auf aktuellen Projektstand gebracht.
-- Veraltete Branch-Aussagen (z. B. fester `main`-Flow) entfernt.
-- Setup, Scripts, API-Endpunkte und Deploy-Pfade konkretisiert.
-
-### Warum?
-
-- Schnellere Einarbeitung und weniger Missverständnisse beim Deploy.
-- Konsistenz mit aktuellem Code und aktuellem Vercel-Workflow.
 
 ### Wie testen/prüfen?
 

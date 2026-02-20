@@ -33,7 +33,7 @@ const DARMSTADT_STATIONS: StationMeta[] = [
 ];
 
 const DEFAULT_STATION = DARMSTADT_STATIONS[0]!;
-const MAX_DEPARTURES = 5;
+const MAX_DEPARTURES = 4;
 
 const toStringParam = (value: unknown): string | undefined => {
   if (typeof value === 'string') return value;
